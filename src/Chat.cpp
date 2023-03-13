@@ -61,7 +61,7 @@ void Chat::menuMain()
 	}
 }
 
-const std::shared_ptr<User> Chat::findUser(std::string &login) const
+const std::shared_ptr<User> Chat::getUserByLogin(std::string &login) const
 {
     for (auto &user : _users)
     {
@@ -93,7 +93,7 @@ void Chat::signUp()
 		getline(std::cin, login);
 		if (isValidLogin(login) == true) 
 		{
-			if (findUser(login) == nullptr)
+			if (getUserByLogin(login) == nullptr)
 			{
 				break; //Если введенный логин валидный и если он свободен, то выходим из цикла ввода логина
 			}
@@ -162,7 +162,7 @@ void Chat::signIn()
 	std::cout << "Input login > ";
 	getline(std::cin, login);
 
-	_currentUser = findUser(login);
+	_currentUser = getUserByLogin(login);
 	if (_currentUser == nullptr)
 	{
 		std::cout << "Login not found." << std::endl << std::endl;
@@ -220,7 +220,29 @@ void Chat::showMessages()
 
 void Chat::printMessage(const std::unique_ptr<Message>& message) const
 {
-	std::cout << message->getFrom()->getName() << " (" << message->getFrom()->getLogin() << ")" << ": " << message->getText() << std::endl;
+	if (message->getFrom() == _currentUser)
+	{
+		std::cout << "Me ";
+	}
+	else
+	{
+		std::cout << message->getFrom()->getName() << " (" << message->getFrom()->getLogin() << ") ";
+	}
+
+	if (message->getTo() == _currentUser)
+	{
+		std::cout << "to me: ";
+	}
+	else if (message->getTo() != nullptr)
+	{
+		std::cout << "to " << message->getTo()->getName() << " (" << message->getTo()->getLogin() << "): ";
+	}
+	else
+	{
+		std::cout << "to all: ";
+	}
+
+	std::cout << message->getText() << std::endl;
 }
 
 void Chat::sendPrivateMessage()
@@ -229,10 +251,11 @@ void Chat::sendPrivateMessage()
 	std::cout << "Input login \"To\"> ";
 	getline(std::cin, login);
 
-	std::shared_ptr<User> to = findUser(login);
+	std::shared_ptr<User> to = getUserByLogin(login);
 	if (to == nullptr)
 	{
-		std::cout << "Login not found.";
+		std::cout << "Login not found." << std::endl;
+		system("pause");
 		return;
 	}
 	else
@@ -241,6 +264,8 @@ void Chat::sendPrivateMessage()
 		std::cout << "Input message > ";
 		getline(std::cin, text);
 		addMessage(to, _currentUser, text);
+		std::cout << std::endl << "The message has been sent." << std::endl;
+		system("pause");
 	}
 }
 
@@ -250,6 +275,8 @@ void Chat::sendPublicMessage()
 	std::cout << "Input message > ";
 	getline(std::cin, text);
 	addMessage(nullptr, _currentUser, text);
+	std::cout << std::endl << "The message has been sent." << std::endl;
+	system("pause");
 }
 
 void Chat::printStartMenu()
@@ -359,7 +386,7 @@ void Chat::showUserByIndex()
 	}
 }
 
-const std::shared_ptr<User> Chat::getUserByIndex(int index) const
+const std::shared_ptr<User> Chat::getUserByIndex(int index) const 
 {
 	if (index < 0 || index >= _users.size())
 	{

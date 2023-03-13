@@ -7,9 +7,9 @@
 
 class Message
 {
-	std::shared_ptr<User> _to;
-	std::shared_ptr<User> _from;
-	std::string _text;
+	const std::shared_ptr<User> _to;
+	const std::shared_ptr<User> _from;
+	const std::string _text;
 
 public:
 	Message(std::shared_ptr<User> to, std::shared_ptr<User> from, std::string text):
