@@ -16,8 +16,8 @@ class Chat
 	void menuMain();
 
 	const std::shared_ptr<User> getUserByLogin(std::string& login) const;
-	const std::shared_ptr<User> getUserByIndex(int index) const throw(std::exception); //только для демонстрации исключений
-	void showUserByIndex(); //только для демонстрации исключений
+	const std::shared_ptr<User> getUserByIndex(int index) const noexcept(false);
+	void showUserByIndex();
 
 	void addUser(std::string& login, std::string& password, std::string& name);
 	void addMessage(std::shared_ptr<User> to, std::shared_ptr<User> from, std::string& text);
@@ -37,9 +37,6 @@ class Chat
 
 	bool isValidLogin(const std::string& login) const;
 	bool isValidPassword(const std::string& password) const;
-
-
-	
 
 	bool repeat();
 

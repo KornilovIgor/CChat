@@ -12,7 +12,7 @@ class Message
 	const std::string _text;
 
 public:
-	Message(std::shared_ptr<User> to, std::shared_ptr<User> from, std::string text):
+	Message(std::shared_ptr<User> to, std::shared_ptr<User> from, const std::string& text):
 	_to(to), _from(from), _text(text)
 	{};
 

@@ -1,6 +1,7 @@
 #include "Chat.h"
 
 #include <iostream>
+#include <algorithm>
 
 void Chat::run()
 {
@@ -9,11 +10,10 @@ void Chat::run()
 
 void Chat::menuStart()
 {
-	int input = -1;
 	while (true)
 	{
 		printStartMenu();
-		input = inputMenu(2);
+		int input = inputMenu(2);
 		switch (input)
 		{
 		case 1:
@@ -32,12 +32,10 @@ void Chat::menuStart()
 
 void Chat::menuMain()
 {
-	
-	int input = -1;
 	while (true)
 	{
 		printUserMenu();
-		input = inputMenu(4);
+		int input = inputMenu(4);
 		switch (input)
 		{
 		case 1:
@@ -95,7 +93,7 @@ void Chat::signUp()
 		{
 			if (getUserByLogin(login) == nullptr)
 			{
-				break; //Если введенный логин валидный и если он свободен, то выходим из цикла ввода логина
+				break;
 			}
 			else
 			{
@@ -105,7 +103,7 @@ void Chat::signUp()
 		}
 		else
 		{
-			std::cout << "Incorrect login. Use only [1..0, a..Z] Size: 1-16" << std::endl;
+			std::cout << "Incorrect login. Use only [1..0, a..Z, !..`] Size: 1-16" << std::endl;
 			system("pause");
 		}
 	
@@ -123,8 +121,7 @@ void Chat::signUp()
 		getline(std::cin, password);
 		if (isValidPassword(password) == false)
 		{
-			//std::cout << "Incorrect password. Use only [1..0, a..Z]. Size: 8-128" << std::endl;
-			std::cout << "Incorrect password. Use only [1..0, a..Z]. Size: 1-128" << std::endl; ////отключил минимальную длину пароля для удобства. Всё равно пока их не шифруем и не скрываем при вводе.
+			std::cout << "Incorrect password. Use only [1..0, a..Z]. Size: 8-128" << std::endl;
 			system("pause");
 		}
 		else
@@ -190,9 +187,6 @@ void Chat::signIn()
 
 void Chat::showMessages()
 {
-	std::string to;
-	std::string text;
-
 	if (_messages.empty())
 	{
 		std::cout << "No messages" << std::endl;
@@ -347,19 +341,16 @@ bool Chat::isValidLogin(const std::string& login ) const
 
 bool Chat::isValidPassword(const std::string& password) const
 {
-	//if (password.length() < 8 || password.length() > 128)
-	if (password.length() < 1 || password.length() > 128) //отключил минимальную длину пароля для удобства. Всё равно пока их не шифруем и не скрываем при вводе.
+	if (password.length() < 8 || password.length() > 128)
 	{
 		return false;
 	}
 
-	for (char ch : password)
-	{
-		if (ch < 33 || ch > 122)
-		{
-			false;
-		}
+	if (std::any_of (password.begin(), password.end(), [](char ch) {return ch < 33 || ch > 122;}))
+    {	
+		return false;
 	}
+
 	return true;
 }
 
@@ -368,7 +359,7 @@ void Chat::showUserByIndex()
 	int index = 0;
 	std::cout << "Index > ";
 	std::cin >> index;
-	if (std::cin.fail() || std::cin.get() != '\n' || index < 0) // || index >= _users.size() - удалил проверку ради исключенияю. Нужно класс исключения писать? 
+	if (std::cin.fail() || std::cin.get() != '\n' || index < 0 || index >= _users.size())
 	{
 		std::cin.clear();
 		std::cin.ignore(std::cin.rdbuf()->in_avail());
@@ -398,21 +389,18 @@ const std::shared_ptr<User> Chat::getUserByIndex(int index) const
 
 bool Chat::repeat()
 {
-	int input = -1;
 	while (true)
 	{
 		std::cout << std::endl;
 		std::cout << "1 - try again" << std::endl;
 		std::cout << "0 - return" << std::endl;
-		input = inputMenu(1);
+		int input = inputMenu(1);
 		switch (input)
 		{
 		case 1:
 			return true;
-			break;
 		case 0:
 			return false;
-			break;
 		default:
 			continue;
 		}
