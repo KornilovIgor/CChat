@@ -2,6 +2,13 @@
 
 #include <iostream>
 #include <algorithm>
+#include <limits>
+
+#ifdef _WIN32
+    const std::string clearCommand = "cls";  // for Windows
+#else
+    const std::string clearCommand = "clear";  // for not Windows
+#endif
 
 void Chat::run()
 {
@@ -19,7 +26,7 @@ void Chat::menuStart()
 		case 1:
 			signIn();
 			break;
-		case 2: 
+		case 2:
 			signUp();
 			break;
 		case 0:
@@ -35,20 +42,17 @@ void Chat::menuMain()
 	while (true)
 	{
 		printUserMenu();
-		int input = inputMenu(4);
+		int input = inputMenu(3);
 		switch (input)
 		{
 		case 1:
 			showMessages();
 			break;
-		case 2: 
+		case 2:
 			sendPrivateMessage();
 			break;
 		case 3:
 			sendPublicMessage();
-			break;
-		case 4:
-			showUserByIndex();
 			break;
 		case 0:
 			_currentUser = nullptr;
@@ -89,7 +93,7 @@ void Chat::signUp()
 	{
 		std::cout << "Input login > ";
 		getline(std::cin, login);
-		if (isValidLogin(login) == true) 
+		if (isValidLogin(login) == true)
 		{
 			if (getUserByLogin(login) == nullptr)
 			{
@@ -98,15 +102,15 @@ void Chat::signUp()
 			else
 			{
 				std::cout << "That login is taken.";
-				system("pause");
+				waitForInput();
 			};
 		}
 		else
 		{
 			std::cout << "Incorrect login. Use only [1..0, a..Z, !..`] Size: 1-16" << std::endl;
-			system("pause");
+			waitForInput();
 		}
-	
+
 		if (repeat() == false)
 		{
 			return;
@@ -122,7 +126,7 @@ void Chat::signUp()
 		if (isValidPassword(password) == false)
 		{
 			std::cout << "Incorrect password. Use only [1..0, a..Z]. Size: 8-128" << std::endl;
-			system("pause");
+			waitForInput();
 		}
 		else
 		{
@@ -135,7 +139,7 @@ void Chat::signUp()
 			else
 			{
 				std::cout << "Passwords don't match." << std::endl << std::endl;
-				system("pause");
+				waitForInput();
 				if (repeat() == false)
 				{
 					return;
@@ -150,7 +154,7 @@ void Chat::signUp()
 
 	addUser(login, password, name);
 	std::cout << "The user has been successfully created" << std::endl << std::endl;
-	system("pause");
+	waitForInput();
 }
 
 void Chat::signIn()
@@ -163,7 +167,7 @@ void Chat::signIn()
 	if (_currentUser == nullptr)
 	{
 		std::cout << "Login not found." << std::endl << std::endl;
-		system("pause");
+		waitForInput();
 		return;
 	}
 
@@ -173,14 +177,14 @@ void Chat::signIn()
 	if (_currentUser->getPassword() == password)
 	{
 		std::cout << std::endl << "Welcome to CChat,  " << _currentUser->getName() << "!" << std::endl << std::endl;
-		system("pause");
+		waitForInput();
 		menuMain();
 	}
 	else
 	{
 		_currentUser = nullptr;
 		std::cout << "Wrong password!";
-		system("pause");
+		waitForInput();
 		return;
 	}
 }
@@ -190,7 +194,7 @@ void Chat::showMessages()
 	if (_messages.empty())
 	{
 		std::cout << "No messages" << std::endl;
-		system("pause");
+		waitForInput();
 		return;
 	}
 
@@ -209,7 +213,7 @@ void Chat::showMessages()
 		std::cout << "No messages" << std::endl;
 	}
 
-	system("pause");
+	waitForInput();
 }
 
 void Chat::printMessage(const std::unique_ptr<Message>& message) const
@@ -249,7 +253,7 @@ void Chat::sendPrivateMessage()
 	if (to == nullptr)
 	{
 		std::cout << "Login not found." << std::endl;
-		system("pause");
+		waitForInput();
 		return;
 	}
 	else
@@ -259,7 +263,7 @@ void Chat::sendPrivateMessage()
 		getline(std::cin, text);
 		addMessage(to, _currentUser, text);
 		std::cout << std::endl << "The message has been sent." << std::endl;
-		system("pause");
+		waitForInput();
 	}
 }
 
@@ -270,12 +274,12 @@ void Chat::sendPublicMessage()
 	getline(std::cin, text);
 	addMessage(nullptr, _currentUser, text);
 	std::cout << std::endl << "The message has been sent." << std::endl;
-	system("pause");
+	waitForInput();
 }
 
 void Chat::printStartMenu()
 {
-	system("cls");
+	system(clearCommand.c_str());
 	std::cout << "CChat:Start menu" << std::endl;
 	std::cout << "1 - SignIn" << std::endl;
 	std::cout << "2 - SignUp" << std::endl;
@@ -285,12 +289,11 @@ void Chat::printStartMenu()
 
 void Chat::printUserMenu()
 {
-	system("cls");
+	system(clearCommand.c_str());
 	std::cout << "CChat:User menu" << std::endl;
 	std::cout << "1 - Show messages" << std::endl;
 	std::cout << "2 - Send private message" << std::endl;
 	std::cout << "3 - Send public message" << std::endl;
-	std::cout << "4 - Show user info by index (only for test exception)" << std::endl;
 	std::cout << "0 - Logout" << std::endl;
 	std::cout << std::endl;
 }
@@ -305,13 +308,13 @@ int Chat::inputMenu(int count)
 		std::cin.clear();
 		std::cin.ignore(std::cin.rdbuf()->in_avail());
 		std::cerr << "Input error: Invalid input item menu" << std::endl << std::endl;
-		system("pause");
+		waitForInput();
 		return -1;
 	}
 	else if (input < 0 || input > count)
 	{
 		std::cout << "Input error: A non-existent menu item is selected." << std::endl << std::endl;
-		system("pause");
+		waitForInput();
 		return -1;
 	}
 	std::cout << std::endl;
@@ -347,44 +350,11 @@ bool Chat::isValidPassword(const std::string& password) const
 	}
 
 	if (std::any_of (password.begin(), password.end(), [](char ch) {return ch < 33 || ch > 122;}))
-    {	
+    {
 		return false;
 	}
 
 	return true;
-}
-
-void Chat::showUserByIndex()
-{
-	int index = 0;
-	std::cout << "Index > ";
-	std::cin >> index;
-	if (std::cin.fail() || std::cin.get() != '\n' || index < 0 || index >= _users.size())
-	{
-		std::cin.clear();
-		std::cin.ignore(std::cin.rdbuf()->in_avail());
-		std::cout << "invalid input index" << std::endl << std::endl;
-		return;
-	}
-	
-	try
-	{
-		std::cout << getUserByIndex(index)->getName() << std::endl;
-	}
-	catch (const char* exception)
-	{
-		std::cerr << "Exception: " << exception << std::endl;
-	}
-}
-
-const std::shared_ptr<User> Chat::getUserByIndex(int index) const 
-{
-	if (index < 0 || index >= _users.size())
-	{
-		throw "index out of range";
-	}
-
-	return _users[index];
 }
 
 bool Chat::repeat()
@@ -405,4 +375,10 @@ bool Chat::repeat()
 			continue;
 		}
 	}
+}
+
+void Chat::waitForInput()
+{
+    std::cout << "Press Enter to continue...";
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }

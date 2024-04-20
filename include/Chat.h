@@ -2,13 +2,13 @@
 
 #include "Message.h"
 
-#include <vector> 
+#include <vector>
 #include <memory>
 
 class Chat
 {
 	std::vector <std::shared_ptr<User>> _users;
-	std::vector <std::unique_ptr<Message>> _messages; 
+	std::vector <std::unique_ptr<Message>> _messages;
 
 	std::shared_ptr<User> _currentUser = nullptr;
 
@@ -16,8 +16,6 @@ class Chat
 	void menuMain();
 
 	const std::shared_ptr<User> getUserByLogin(std::string& login) const;
-	const std::shared_ptr<User> getUserByIndex(int index) const noexcept(false);
-	void showUserByIndex();
 
 	void addUser(std::string& login, std::string& password, std::string& name);
 	void addMessage(std::shared_ptr<User> to, std::shared_ptr<User> from, std::string& text);
@@ -39,6 +37,7 @@ class Chat
 	bool isValidPassword(const std::string& password) const;
 
 	bool repeat();
+	void waitForInput();
 
 public:
 	void run();
