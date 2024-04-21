@@ -1046,3 +1046,4 @@ dkms.conf
 
 ###Added
 *.json
+.vscode

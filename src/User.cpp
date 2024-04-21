@@ -2,30 +2,35 @@
 
 void User::setLogin(std::string& login)
 {
-    _login = login;
-}
-
-void User::setPassword(std::string& login)
-{
-    _login = login;
+    login_ = login;
 }
 
 void User::setName(std::string& name)
 {
-    _name = name;
+    name_ = name;
 }
 
-std::string const &User::getLogin()
+int User::getID()
 {
-    return _login;
+    return id_;
 }
 
-std::string const& User::getPassword()
+std::string const& User::getLogin()
 {
-    return _password;
+    return login_;
+}
+
+std::string const& User::getPassHash()
+{
+    return passHash_;
+}
+
+std::string const& User::getPassSalt()
+{
+    return passSalt_;
 }
 
 std::string const& User::getName()
 {
-    return _name;
+    return name_;
 }

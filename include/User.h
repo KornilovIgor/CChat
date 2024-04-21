@@ -4,20 +4,23 @@
 
 class User
 {
-	std::string _login;
-	std::string _password;
-	std::string _name;
+	int id_;
+	std::string login_;
+	std::string passHash_;
+	std::string passSalt_;
+	std::string name_;
 
 public:
-	User(const std::string& login, const std::string& password, const std::string& name):
-	_login(login), _password(password), _name(name)
+	User(int id, const std::string& login, const std::string& passHash,  const std::string& passHashSalt, const std::string& name):
+	id_(id), login_(login), passHash_(passHash), passSalt_(passHashSalt), name_(name)
 	{};
 
 	void setLogin(std::string& login);
-	void setPassword(std::string& login);
 	void setName(std::string& name);
 
+	int getID();
 	std::string const& getLogin();
-	std::string const& getPassword();
+	std::string const& getPassHash();
+	std::string const& getPassSalt();
 	std::string const& getName();
 };

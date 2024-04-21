@@ -65,7 +65,7 @@ void Chat::menuMain()
 
 const std::shared_ptr<User> Chat::getUserByLogin(std::string &login) const
 {
-    for (auto &user : _users)
+    for (auto &user : users_)
     {
         if (login == user->getLogin())
         {
@@ -77,13 +77,17 @@ const std::shared_ptr<User> Chat::getUserByLogin(std::string &login) const
 
 void Chat::addUser(std::string& login, std::string& password, std::string& name)
 {
-    _currentUser = std::make_shared<User>(login, password, name);
-    _users.push_back(_currentUser);
+	sha256 sha256;
+	std::string salt = sha256.generate_salt();
+	std::string hashedPassword = sha256.sha256_salt(password, salt);
+    _currentUser = std::make_shared<User>(usersCount_, login, hashedPassword, salt, name);
+    users_.push_back(_currentUser);
+	++usersCount_;
 }
 
 void Chat::addMessage(std::shared_ptr<User> to, std::shared_ptr<User> from, std::string &text)
 {
-	_messages.push_back(std::make_unique<Message>(to, from, text));
+	messages_.push_back(std::make_unique<Message>(to, from, text));
 }
 
 void Chat::signUp()
@@ -172,9 +176,10 @@ void Chat::signIn()
 	}
 
 	std::string password;
+	sha256 sha256;
 	std::cout << "Input password > ";
 	getline(std::cin, password);
-	if (_currentUser->getPassword() == password)
+	if (_currentUser->getPassHash() == sha256.sha256_salt(password, _currentUser->getPassSalt()))
 	{
 		std::cout << std::endl << "Welcome to CChat,  " << _currentUser->getName() << "!" << std::endl << std::endl;
 		waitForInput();
@@ -191,7 +196,7 @@ void Chat::signIn()
 
 void Chat::showMessages()
 {
-	if (_messages.empty())
+	if (messages_.empty())
 	{
 		std::cout << "No messages" << std::endl;
 		waitForInput();
@@ -199,7 +204,7 @@ void Chat::showMessages()
 	}
 
 	int countPrintMessages{ 0 };
-	for (auto &message : _messages)
+	for (auto &message : messages_)
 	{
 		if ((message->getTo() == _currentUser) || (message->getTo() == nullptr) || (message->getFrom() == _currentUser))
 			{

@@ -1,16 +1,20 @@
 #pragma once
 
 #include "Message.h"
+#include "sha256.h"
 
 #include <vector>
 #include <memory>
 
 class Chat
 {
-	std::vector <std::shared_ptr<User>> _users;
-	std::vector <std::unique_ptr<Message>> _messages;
+	std::vector <std::shared_ptr<User>> users_;
+	std::vector <std::unique_ptr<Message>> messages_;
 
 	std::shared_ptr<User> _currentUser = nullptr;
+
+	unsigned int usersCount_{0};
+	unsigned long int messagesCount_{0};
 
 	void menuStart();
 	void menuMain();
