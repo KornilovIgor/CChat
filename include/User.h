@@ -11,8 +11,16 @@ class User
 	std::string name_;
 
 public:
-	User(int id, const std::string& login, const std::string& passHash,  const std::string& passHashSalt, const std::string& name):
-	id_(id), login_(login), passHash_(passHash), passSalt_(passHashSalt), name_(name)
+	User(int id,
+		const std::string& login,
+		const std::string& passHash,
+		const std::string& passSalt,
+		const std::string& name):
+	id_(id),
+	login_(login),
+	passHash_(passHash),
+	passSalt_(passSalt),
+	name_(name)
 	{};
 
 	void setLogin(std::string& login);

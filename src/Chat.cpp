@@ -3,6 +3,9 @@
 #include <iostream>
 #include <algorithm>
 #include <limits>
+#include <fstream>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #ifdef _WIN32
     const std::string clearCommand = "cls";  // for Windows
@@ -12,7 +15,15 @@
 
 void Chat::run()
 {
+	if (loadUsers(users_))
+	{
+		loadMessages(messages_);
+	}
+
 	menuStart();
+
+	saveUsers(users_);
+	saveMessages(messages_);
 }
 
 void Chat::menuStart()
@@ -73,6 +84,15 @@ const std::shared_ptr<User> Chat::getUserByLogin(std::string &login) const
         }
     }
     return nullptr;
+}
+
+const std::shared_ptr<User> Chat::getUserById(unsigned int id) const
+{
+	if (id < 0 || id >= users_.size())
+	{
+		return nullptr;
+	}
+    return users_.at(id);
 }
 
 void Chat::addUser(std::string& login, std::string& password, std::string& name)
@@ -221,7 +241,7 @@ void Chat::showMessages()
 	waitForInput();
 }
 
-void Chat::printMessage(const std::unique_ptr<Message>& message) const
+void Chat::printMessage(const std::shared_ptr<Message>& message) const
 {
 	if (message->getFrom() == _currentUser)
 	{
@@ -387,3 +407,129 @@ void Chat::waitForInput()
     std::cout << "Press Enter to continue...";
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
+
+void Chat::saveUsers(const std::vector<std::shared_ptr<User>>& users)
+{
+    std::ofstream file("./users");
+    if (file.is_open())
+	{
+        for (const auto& user : users)
+		{
+            file << user->getID() << '\x01'
+			<< user->getLogin() << '\x01'
+			<< user->getPassHash() << '\x01'
+			<< user->getPassSalt() << '\x01'
+			<< user->getName() << '\x01'
+			<< '\n';
+        }
+        file.close();
+
+		fs::permissions("./users",
+        fs::perms::group_all | fs::perms::others_all,
+        fs::perm_options::remove);
+    }
+	else
+	{
+        std::cerr << "Error: Unable to open users file for writing." << std::endl;
+    }
+}
+
+bool Chat::loadUsers(std::vector<std::shared_ptr<User>>& users)
+{
+    std::ifstream file("./users");
+    if (file.is_open())
+	{
+        std::string line;
+        while (std::getline(file, line))
+		{
+            std::stringstream ss(line);
+            std::string idStr, login, passHash, passSalt, name, endl;
+            if (std::getline(ss, idStr, '\x01') &&
+				std::getline(ss, login, '\x01') &&
+				std::getline(ss, passHash, '\x01') &&
+				std::getline(ss, passSalt, '\x01') &&
+				std::getline(ss, name, '\x01') &&
+				std::getline(ss, endl, '\n'));
+			{
+                int id = std::stoi(idStr);
+                users.push_back(std::make_shared<User>(id, login, passHash, passSalt, name));
+            }
+        }
+        file.close();
+		return true;
+    }
+	else
+	{
+        std::cerr << "Error: Unable to open users file for reading." << std::endl;
+		return false;
+    }
+}
+
+void Chat::saveMessages(const std::vector<std::shared_ptr<Message>>& messages)
+{
+    std::ofstream file("./messages");
+    if (file.is_open())
+	{
+        for (const auto& message : messages)
+		{
+			auto to = message->getTo();
+			if (to == nullptr)
+			{
+				file << " ";
+			}
+			else
+			{
+				file << to->getID();
+			}
+
+            file << '\x01' << message->getFrom()->getID() << '\x01' << message->getText() << '\n';
+        }
+        file.close();
+
+		fs::permissions("./messages",
+        fs::perms::group_all | fs::perms::others_all,
+        fs::perm_options::remove);
+    }
+	else
+	{
+        std::cerr << "Error: Unable to open messages file for writing." << std::endl;
+    }
+}
+
+
+bool Chat::loadMessages(std::vector<std::shared_ptr<Message>>& messages)
+{
+    std::ifstream file("./messages");
+    if (file.is_open())
+	{
+        std::string line;
+        while (std::getline(file, line))
+		{
+            std::stringstream ss(line);
+            std::string idToStr, idFromStr, text, endl;
+            if (std::getline(ss, idToStr, '\x01') &&
+				std::getline(ss, idFromStr, '\x01') &&
+				std::getline(ss, text, '\x01') &&
+				std::getline(ss, endl, '\n'));
+			{
+				std::shared_ptr<User> to = nullptr;
+                if (idToStr != " ")
+				{
+					to = users_.at(std::stoi(idToStr));
+				}
+
+				std::shared_ptr<User> from = users_.at(std::stoi(idFromStr));
+
+                messages.push_back(std::make_shared<Message>(to, from, text));
+            }
+        }
+        file.close();
+		return true;
+    }
+	else
+	{
+        std::cerr << "Error: Unable to open messages file for reading." << std::endl;
+		return false;
+    }
+}
+

@@ -9,7 +9,7 @@
 class Chat
 {
 	std::vector <std::shared_ptr<User>> users_;
-	std::vector <std::unique_ptr<Message>> messages_;
+	std::vector <std::shared_ptr<Message>> messages_;
 
 	std::shared_ptr<User> _currentUser = nullptr;
 
@@ -20,6 +20,7 @@ class Chat
 	void menuMain();
 
 	const std::shared_ptr<User> getUserByLogin(std::string& login) const;
+	const std::shared_ptr<User> getUserById(unsigned int id) const;
 
 	void addUser(std::string& login, std::string& password, std::string& name);
 	void addMessage(std::shared_ptr<User> to, std::shared_ptr<User> from, std::string& text);
@@ -28,7 +29,7 @@ class Chat
 	void signIn();
 
 	void showMessages();
-	void printMessage(const std::unique_ptr<Message>& Message) const;
+	void printMessage(const std::shared_ptr<Message>& Message) const;
 
 	void sendPrivateMessage();
 	void sendPublicMessage();
@@ -42,6 +43,11 @@ class Chat
 
 	bool repeat();
 	void waitForInput();
+
+	void saveUsers(const std::vector<std::shared_ptr<User>>& users);
+	bool loadUsers(std::vector<std::shared_ptr<User>>& users);
+	void saveMessages(const std::vector<std::shared_ptr<Message>>& messages);
+	bool loadMessages(std::vector<std::shared_ptr<Message>>& messages);
 
 public:
 	void run();
