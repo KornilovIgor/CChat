@@ -11,7 +11,7 @@ class Chat
 	std::vector <std::shared_ptr<User>> users_;
 	std::vector <std::shared_ptr<Message>> messages_;
 
-	std::shared_ptr<User> _currentUser = nullptr;
+	std::shared_ptr<User> currentUser_ = nullptr;
 
 	unsigned int usersCount_{0};
 	unsigned long int messagesCount_{0};

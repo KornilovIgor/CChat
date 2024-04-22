@@ -66,7 +66,7 @@ void Chat::menuMain()
 			sendPublicMessage();
 			break;
 		case 0:
-			_currentUser = nullptr;
+			currentUser_ = nullptr;
 			return;
 		default:
 			break;
@@ -100,8 +100,8 @@ void Chat::addUser(std::string& login, std::string& password, std::string& name)
 	sha256 sha256;
 	std::string salt = sha256.generate_salt();
 	std::string hashedPassword = sha256.sha256_salt(password, salt);
-    _currentUser = std::make_shared<User>(usersCount_, login, hashedPassword, salt, name);
-    users_.push_back(_currentUser);
+    currentUser_ = std::make_shared<User>(usersCount_, login, hashedPassword, salt, name);
+    users_.push_back(currentUser_);
 	++usersCount_;
 }
 
@@ -187,8 +187,8 @@ void Chat::signIn()
 	std::cout << "Input login > ";
 	getline(std::cin, login);
 
-	_currentUser = getUserByLogin(login);
-	if (_currentUser == nullptr)
+	currentUser_ = getUserByLogin(login);
+	if (currentUser_ == nullptr)
 	{
 		std::cout << "Login not found." << std::endl << std::endl;
 		waitForInput();
@@ -199,15 +199,15 @@ void Chat::signIn()
 	sha256 sha256;
 	std::cout << "Input password > ";
 	getline(std::cin, password);
-	if (_currentUser->getPassHash() == sha256.sha256_salt(password, _currentUser->getPassSalt()))
+	if (currentUser_->getPassHash() == sha256.sha256_salt(password, currentUser_->getPassSalt()))
 	{
-		std::cout << std::endl << "Welcome to CChat,  " << _currentUser->getName() << "!" << std::endl << std::endl;
+		std::cout << std::endl << "Welcome to CChat,  " << currentUser_->getName() << "!" << std::endl << std::endl;
 		waitForInput();
 		menuMain();
 	}
 	else
 	{
-		_currentUser = nullptr;
+		currentUser_ = nullptr;
 		std::cout << "Wrong password!";
 		waitForInput();
 		return;
@@ -226,7 +226,7 @@ void Chat::showMessages()
 	int countPrintMessages{ 0 };
 	for (auto &message : messages_)
 	{
-		if ((message->getTo() == _currentUser) || (message->getTo() == nullptr) || (message->getFrom() == _currentUser))
+		if ((message->getTo() == currentUser_) || (message->getTo() == nullptr) || (message->getFrom() == currentUser_))
 			{
 				printMessage(message);
 				++countPrintMessages;
@@ -243,7 +243,7 @@ void Chat::showMessages()
 
 void Chat::printMessage(const std::shared_ptr<Message>& message) const
 {
-	if (message->getFrom() == _currentUser)
+	if (message->getFrom() == currentUser_)
 	{
 		std::cout << "Me ";
 	}
@@ -252,7 +252,7 @@ void Chat::printMessage(const std::shared_ptr<Message>& message) const
 		std::cout << message->getFrom()->getName() << " (" << message->getFrom()->getLogin() << ") ";
 	}
 
-	if (message->getTo() == _currentUser)
+	if (message->getTo() == currentUser_)
 	{
 		std::cout << "to me: ";
 	}
@@ -286,7 +286,7 @@ void Chat::sendPrivateMessage()
 		std::string text;
 		std::cout << "Input message > ";
 		getline(std::cin, text);
-		addMessage(to, _currentUser, text);
+		addMessage(to, currentUser_, text);
 		std::cout << std::endl << "The message has been sent." << std::endl;
 		waitForInput();
 	}
@@ -297,7 +297,7 @@ void Chat::sendPublicMessage()
 	std::string text;
 	std::cout << "Input message > ";
 	getline(std::cin, text);
-	addMessage(nullptr, _currentUser, text);
+	addMessage(nullptr, currentUser_, text);
 	std::cout << std::endl << "The message has been sent." << std::endl;
 	waitForInput();
 }
